@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDF &amp; Photo Compression</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗜️</text></svg>" />
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 7V4h16v3" /><path d="M4 17v3h16v-3" />
+            <path d="M9 12h6" /><path d="M12 9l-3 3 3 3" /><path d="M12 9l3 3-3 3" />
+          </svg>
+        </div>
+        <div>
+          <h1>PDF &amp; Photo Compression</h1>
+          <p class="tagline">Shrink documents and images locally. Nothing leaves this machine.</p>
+        </div>
+      </div>
+      <div class="caps" id="caps"></div>
+    </header>
+
+    <section class="dropzone" id="dropzone" tabindex="0" role="button"
+             aria-label="Choose files or drop them here">
+      <input type="file" id="fileInput" multiple hidden
+             accept=".pdf,.jpg,.jpeg,.png,.webp,.avif,.gif,.bmp,.tif,.tiff,application/pdf,image/*" />
+      <div class="dropzone-inner">
+        <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 16V4" /><path d="m7 9 5-5 5 5" />
+          <path d="M20 16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2" />
+        </svg>
+        <p class="dz-title">Drop files here or <span class="link">browse</span></p>
+        <p class="dz-hint" id="dzHint">PDF · JPEG · PNG · WebP · AVIF · GIF · BMP · TIFF</p>
+      </div>
+    </section>
+
+    <section class="queue" id="queue" hidden>
+      <div class="queue-head">
+        <h2>Selected <span class="count" id="queueCount">0</span></h2>
+        <button class="btn btn-ghost btn-sm" id="clearQueue" type="button">Clear</button>
+      </div>
+      <ul class="chips" id="queueList"></ul>
+    </section>
+
+    <section class="settings" id="settings">
+      <div class="panel" id="imagePanel">
+        <div class="panel-head">
+          <h2>Images</h2>
+          <span class="badge" id="imageBadge" hidden>0</span>
+        </div>
+
+        <div class="field">
+          <label>Preset</label>
+          <div class="segmented" id="imagePreset" role="group">
+            <button type="button" data-preset="quality">High quality</button>
+            <button type="button" data-preset="balanced" class="active">Balanced</button>
+            <button type="button" data-preset="small">Small</button>
+            <button type="button" data-preset="tiny">Tiny</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="imageQuality">
+            Quality <output class="value" id="imageQualityOut">78</output>
+          </label>
+          <input type="range" id="imageQuality" min="10" max="100" step="1" value="78" />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="imageFormat">Output format</label>
+            <select id="imageFormat">
+              <option value="auto">Keep original</option>
+              <option value="smallest">Smallest (may convert)</option>
+              <option value="jpeg">JPEG</option>
+              <option value="webp">WebP</option>
+              <option value="avif">AVIF</option>
+              <option value="png">PNG</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="imageMaxDim">Resize longest edge</label>
+            <select id="imageMaxDim">
+              <option value="0">Don't resize</option>
+              <option value="3840">3840 px (4K)</option>
+              <option value="2560">2560 px</option>
+              <option value="1920">1920 px (Full HD)</option>
+              <option value="1280">1280 px</option>
+              <option value="800">800 px</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" id="imageStrip" checked />
+          <span>Strip EXIF &amp; location data <em>(colour profile kept)</em></span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="imageLossyPng" checked />
+          <span>Allow palette reduction for PNG</span>
+        </label>
+      </div>
+
+      <div class="panel" id="pdfPanel">
+        <div class="panel-head">
+          <h2>PDFs</h2>
+          <span class="badge" id="pdfBadge" hidden>0</span>
+        </div>
+
+        <div class="field">
+          <label>Compression level</label>
+          <div class="radio-list" id="pdfMode">
+            <label class="radio">
+              <input type="radio" name="pdfmode" value="lossless" />
+              <span><strong>Lossless</strong><em>Rebuild &amp; restream. Images untouched.</em></span>
+            </label>
+            <label class="radio">
+              <input type="radio" name="pdfmode" value="light" />
+              <span><strong>Light</strong><em>200 DPI. Print quality kept.</em></span>
+            </label>
+            <label class="radio">
+              <input type="radio" name="pdfmode" value="balanced" checked />
+              <span><strong>Balanced</strong><em>150 DPI. Best for sharing.</em></span>
+            </label>
+            <label class="radio">
+              <input type="radio" name="pdfmode" value="strong" />
+              <span><strong>Strong</strong><em>110 DPI. Noticeably softer images.</em></span>
+            </label>
+            <label class="radio">
+              <input type="radio" name="pdfmode" value="extreme" />
+              <span><strong>Extreme</strong><em>72 DPI. Screen reading only.</em></span>
+            </label>
+          </div>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" id="pdfGrayscale" />
+          <span>Convert to grayscale</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="pdfLinearize" />
+          <span>Optimise for fast web view</span>
+        </label>
+        <p class="panel-note" id="gsNote" hidden></p>
+      </div>
+    </section>
+
+    <div class="actions">
+      <label class="check compact">
+        <input type="checkbox" id="neverGrow" checked />
+        <span>Never return a file bigger than the original</span>
+      </label>
+      <button class="btn btn-primary" id="compressBtn" type="button" disabled>
+        <span class="btn-label">Compress</span>
+      </button>
+    </div>
+
+    <section class="results" id="results" hidden>
+      <div class="summary" id="summary">
+        <div class="summary-main">
+          <div class="summary-stat">
+            <span class="stat-label">Saved</span>
+            <span class="stat-value" id="summarySaved">—</span>
+          </div>
+          <div class="summary-bar">
+            <div class="summary-bar-fill" id="summaryBar" style="width:0%"></div>
+          </div>
+          <div class="summary-sizes" id="summarySizes">—</div>
+        </div>
+        <button class="btn btn-primary" id="downloadAll" type="button" disabled>Download all (.zip)</button>
+      </div>
+      <ul class="result-list" id="resultList"></ul>
+    </section>
+
+    <p class="toast" id="toast" hidden></p>
+
+    <footer class="foot">
+      <span>Runs entirely on your machine · results auto-delete after <span id="ttl">60</span> min</span>
+    </footer>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
